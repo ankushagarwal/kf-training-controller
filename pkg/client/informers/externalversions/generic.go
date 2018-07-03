@@ -37,6 +37,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=kubeflow.org, Version=v1alpha2
+	case v1alpha2.SchemeGroupVersion.WithResource("pytorchjobs"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1alpha2().PyTorchJobs().Informer()}, nil
 	case v1alpha2.SchemeGroupVersion.WithResource("tfjobs"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1alpha2().TFJobs().Informer()}, nil
 

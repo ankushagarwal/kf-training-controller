@@ -28,11 +28,21 @@ var (
 // Adds the list of known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
+		&PyTorchJob{},
+		&PyTorchJobList{},
 		&TFJob{},
 		&TFJobList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type PyTorchJobList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []PyTorchJob `json:"items"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -49,6 +59,45 @@ func getFloat(f float64) *float64 {
 }
 
 var (
+	// Define CRDs for resources
+	PyTorchJobCRD = v1beta1.CustomResourceDefinition{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "pytorchjobs.kubeflow.org",
+		},
+		Spec: v1beta1.CustomResourceDefinitionSpec{
+			Group:   "kubeflow.org",
+			Version: "v1alpha2",
+			Names: v1beta1.CustomResourceDefinitionNames{
+				Kind:   "PyTorchJob",
+				Plural: "pytorchjobs",
+			},
+			Scope: "Namespaced",
+			Validation: &v1beta1.CustomResourceValidation{
+				OpenAPIV3Schema: &v1beta1.JSONSchemaProps{
+					Type: "object",
+					Properties: map[string]v1beta1.JSONSchemaProps{
+						"apiVersion": v1beta1.JSONSchemaProps{
+							Type: "string",
+						},
+						"kind": v1beta1.JSONSchemaProps{
+							Type: "string",
+						},
+						"metadata": v1beta1.JSONSchemaProps{
+							Type: "object",
+						},
+						"spec": v1beta1.JSONSchemaProps{
+							Type:       "object",
+							Properties: map[string]v1beta1.JSONSchemaProps{},
+						},
+						"status": v1beta1.JSONSchemaProps{
+							Type:       "object",
+							Properties: map[string]v1beta1.JSONSchemaProps{},
+						},
+					},
+				},
+			},
+		},
+	}
 	// Define CRDs for resources
 	TFJobCRD = v1beta1.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{

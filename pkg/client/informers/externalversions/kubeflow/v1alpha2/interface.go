@@ -8,6 +8,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// PyTorchJobs returns a PyTorchJobInformer.
+	PyTorchJobs() PyTorchJobInformer
 	// TFJobs returns a TFJobInformer.
 	TFJobs() TFJobInformer
 }
@@ -21,6 +23,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// PyTorchJobs returns a PyTorchJobInformer.
+func (v *version) PyTorchJobs() PyTorchJobInformer {
+	return &pyTorchJobInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // TFJobs returns a TFJobInformer.

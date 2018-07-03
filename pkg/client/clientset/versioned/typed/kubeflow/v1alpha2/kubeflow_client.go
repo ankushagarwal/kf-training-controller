@@ -11,12 +11,17 @@ import (
 
 type KubeflowV1alpha2Interface interface {
 	RESTClient() rest.Interface
+	PyTorchJobsGetter
 	TFJobsGetter
 }
 
 // KubeflowV1alpha2Client is used to interact with features provided by the kubeflow.org group.
 type KubeflowV1alpha2Client struct {
 	restClient rest.Interface
+}
+
+func (c *KubeflowV1alpha2Client) PyTorchJobs(namespace string) PyTorchJobInterface {
+	return newPyTorchJobs(c, namespace)
 }
 
 func (c *KubeflowV1alpha2Client) TFJobs(namespace string) TFJobInterface {

@@ -2,4 +2,6 @@
 
 package v1alpha2
 
+type PyTorchJobExpansion interface{}
+
 type TFJobExpansion interface{}

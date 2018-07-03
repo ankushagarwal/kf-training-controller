@@ -1,0 +1,6 @@
+apiVersion: kubeflow.org/v1alpha2
+kind: PyTorchJob
+metadata:
+  name: pytorchjob-example
+spec:
+  foo: bar

@@ -2,6 +2,14 @@
 
 package v1alpha2
 
+// PyTorchJobListerExpansion allows custom methods to be added to
+// PyTorchJobLister.
+type PyTorchJobListerExpansion interface{}
+
+// PyTorchJobNamespaceListerExpansion allows custom methods to be added to
+// PyTorchJobNamespaceLister.
+type PyTorchJobNamespaceListerExpansion interface{}
+
 // TFJobListerExpansion allows custom methods to be added to
 // TFJobLister.
 type TFJobListerExpansion interface{}

@@ -12,6 +12,10 @@ type FakeKubeflowV1alpha2 struct {
 	*testing.Fake
 }
 
+func (c *FakeKubeflowV1alpha2) PyTorchJobs(namespace string) v1alpha2.PyTorchJobInterface {
+	return &FakePyTorchJobs{c, namespace}
+}
+
 func (c *FakeKubeflowV1alpha2) TFJobs(namespace string) v1alpha2.TFJobInterface {
 	return &FakeTFJobs{c, namespace}
 }
