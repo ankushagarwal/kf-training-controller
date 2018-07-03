@@ -11,14 +11,12 @@ import (
 
 // TFJobSpec defines the desired state of TFJob
 type TFJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "kubebuilder generate" to regenerate code after modifying this file
+	KFJobSpec
 }
 
 // TFJobStatus defines the observed state of TFJob
 type TFJobStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "kubebuilder generate" to regenerate code after modifying this file
+	KFJobStatus
 }
 
 // +genclient

@@ -11,14 +11,12 @@ import (
 
 // PyTorchJobSpec defines the desired state of PyTorchJob
 type PyTorchJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "kubebuilder generate" to regenerate code after modifying this file
+	KFJobSpec
 }
 
 // PyTorchJobStatus defines the observed state of PyTorchJob
 type PyTorchJobStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "kubebuilder generate" to regenerate code after modifying this file
+	KFJobStatus
 }
 
 // +genclient
