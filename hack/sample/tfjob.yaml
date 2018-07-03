@@ -1,0 +1,6 @@
+apiVersion: kubeflow.org/v1alpha2
+kind: TFJob
+metadata:
+  name: tfjob-example
+spec:
+  foo: bar
