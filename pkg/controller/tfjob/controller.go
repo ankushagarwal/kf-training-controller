@@ -5,14 +5,14 @@ import (
 
 	"github.com/kubernetes-sigs/kubebuilder/pkg/controller"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/controller/types"
-	"k8s.io/client-go/tools/record"
-
 	kubeflowv1alpha2 "github.com/ankushagarwal/kf-training-controller/pkg/apis/kubeflow/v1alpha2"
-	kubeflowv1alpha2client "github.com/ankushagarwal/kf-training-controller/pkg/client/clientset/versioned/typed/kubeflow/v1alpha2"
-	kubeflowv1alpha2informer "github.com/ankushagarwal/kf-training-controller/pkg/client/informers/externalversions/kubeflow/v1alpha2"
-	kubeflowv1alpha2lister "github.com/ankushagarwal/kf-training-controller/pkg/client/listers/kubeflow/v1alpha2"
-
 	"github.com/ankushagarwal/kf-training-controller/pkg/inject/args"
+	"github.com/ankushagarwal/kf-training-controller/pkg/controller/base"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/controller/eventhandlers"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/controller/predicates"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
+
 )
 
 // EDIT THIS FILE
@@ -26,13 +26,12 @@ func (bc *TFJobController) Reconcile(k types.ReconcileKey) error {
 }
 
 // +kubebuilder:controller:group=kubeflow,version=v1alpha2,kind=TFJob,resource=tfjobs
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=service,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:informers:group=core,version=v1,kind=Pod
+// +kubebuilder:informers:group=core,version=v1,kind=Service
 type TFJobController struct {
-	// INSERT ADDITIONAL FIELDS HERE
-	tfjobLister kubeflowv1alpha2lister.TFJobLister
-	tfjobclient kubeflowv1alpha2client.KubeflowV1alpha2Interface
-	// recorder is an event recorder for recording Event resources to the
-	// Kubernetes API.
-	tfjobrecorder record.EventRecorder
+	base.BaseJobController
 }
 
 // ProvideController provides a controller that will be run at startup.  Kubebuilder will use codegeneration
@@ -40,10 +39,10 @@ type TFJobController struct {
 func ProvideController(arguments args.InjectArgs) (*controller.GenericController, error) {
 	// INSERT INITIALIZATIONS FOR ADDITIONAL FIELDS HERE
 	bc := &TFJobController{
-		tfjobLister: arguments.ControllerManager.GetInformerProvider(&kubeflowv1alpha2.TFJob{}).(kubeflowv1alpha2informer.TFJobInformer).Lister(),
-
-		tfjobclient:   arguments.Clientset.KubeflowV1alpha2(),
-		tfjobrecorder: arguments.CreateRecorder("TFJobController"),
+		base.BaseJobController{
+			InjectArgs: arguments,
+			EventRecorder: arguments.CreateRecorder(
+				"TFJobController"),},
 	}
 
 	// Create a new controller that will call TFJobController.Reconcile on changes to TFJobs
@@ -56,17 +55,20 @@ func ProvideController(arguments args.InjectArgs) (*controller.GenericController
 		return gc, err
 	}
 
-	// IMPORTANT:
-	// To watch additional resource types - such as those created by your controller - add gc.Watch* function calls here
-	// Watch function calls will transform each object event into a TFJob Key to be reconciled by the controller.
-	//
-	// **********
-	// For any new Watched types, you MUST add the appropriate // +kubebuilder:informer and // +kubebuilder:rbac
-	// annotations to the TFJobController and run "kubebuilder generate.
-	// This will generate the code to start the informers and create the RBAC rules needed for running in a cluster.
-	// See:
-	// https://godoc.org/github.com/kubernetes-sigs/kubebuilder/pkg/gen/controller#example-package
-	// **********
-
+	// Watch Pods
+	tfJobsLookup := func(k types.ReconcileKey) (
+		interface{}, error) {
+		d, err := bc.Clientset.
+			KubeflowV1alpha2().
+			TFJobs(k.Namespace).
+			Get(k.Name, metav1.GetOptions{})
+		return d, err
+	}
+	if err := gc.WatchControllerOf(
+		&corev1.Pod{},
+		eventhandlers.Path{tfJobsLookup},
+		predicates.ResourceVersionChanged); err != nil {
+		return gc, err
+	}
 	return gc, nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/ankushagarwal/kf-training-controller/pkg/controller/tfjob"
 	"github.com/ankushagarwal/kf-training-controller/pkg/inject/args"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/inject/run"
+	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -27,6 +28,12 @@ func init() {
 		}
 
 		// Add Kubernetes informers
+		if err := arguments.ControllerManager.AddInformerProvider(&corev1.Pod{}, arguments.KubernetesInformers.Core().V1().Pods()); err != nil {
+			return err
+		}
+		if err := arguments.ControllerManager.AddInformerProvider(&corev1.Service{}, arguments.KubernetesInformers.Core().V1().Services()); err != nil {
+			return err
+		}
 
 		if c, err := pytorchjob.ProvideController(arguments); err != nil {
 			return err
@@ -49,6 +56,28 @@ func init() {
 		APIGroups: []string{"kubeflow.org"},
 		Resources: []string{"*"},
 		Verbs:     []string{"*"},
+	})
+	Injector.PolicyRules = append(Injector.PolicyRules, rbacv1.PolicyRule{
+		APIGroups: []string{
+			"core",
+		},
+		Resources: []string{
+			"pods",
+		},
+		Verbs: []string{
+			"create", "delete", "get", "list", "patch", "update", "watch",
+		},
+	})
+	Injector.PolicyRules = append(Injector.PolicyRules, rbacv1.PolicyRule{
+		APIGroups: []string{
+			"core",
+		},
+		Resources: []string{
+			"service",
+		},
+		Verbs: []string{
+			"create", "delete", "get", "list", "patch", "update", "watch",
+		},
 	})
 	// Inject GroupVersions
 	Injector.GroupVersions = append(Injector.GroupVersions, schema.GroupVersion{
